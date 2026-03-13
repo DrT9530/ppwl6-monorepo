@@ -1,0 +1,17 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+  runtime    = "bun"
+  output     = "../src/generated/prisma/client" // <--- WAJIB ADA agar folder generated muncul
+}
+
+datasource db {
+  provider = "sqlite"
+  // JANGAN tulis url di sini, biarkan kosong agar diatur prisma.config.ts
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}

@@ -1,20 +1,37 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import type { ApiResponse, HealthCheck } from "shared";
+import { prisma } from "../prisma/db";
+import type { ApiResponse, User, HealthCheck } from "shared";
 
 const app = new Elysia()
-  .use(cors({ origin: ["http://localhost:5173"] }))
+  // Mengizinkan Frontend mengakses API (CORS)
+  .use(cors({ 
+    origin: ["http://localhost:5173", "http://localhost:5174"] 
+  }))
+  // Dokumentasi API otomatis
   .use(swagger())
+  
+  // Endpoint Cek Kesehatan
   .get("/", (): ApiResponse<HealthCheck> => {
     return {
       data: { status: "ok" },
-      message: "server running" 
+      message: "server running"
     }
   })
+
+  // Endpoint Ambil Data User dari Database
+  .get("/users", async () => {
+    const users = await prisma.user.findMany();
+    
+    const response: ApiResponse<User[]> = {
+      data: users,
+      message: "User list retrieved"
+    };
+    
+    return response;
+  })
+  
   .listen(3000);
 
-console.log(`🦊 Backend → http://localhost:${app.server?.port}`);
-console.log(`📖 Swagger → http://localhost:${app.server?.port}/swagger`);
-
-export type App = typeof app;
+console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
